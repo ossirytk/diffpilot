@@ -1,0 +1,1 @@
+"""diffpilot MCP server."""
