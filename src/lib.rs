@@ -24,6 +24,11 @@ pub fn parse_diff<'py>(py: Python<'py>, diff_text: &str) -> PyResult<Bound<'py, 
         if line.starts_with("diff ") {
             files_changed += 1;
             in_header = true;
+        } else if line.starts_with("--- ") && !in_header {
+            // Plain unified diff (e.g. difflib output) — no leading "diff" line.
+            // Start a new file record when we are not already inside a header block.
+            files_changed += 1;
+            in_header = true;
         } else if line.starts_with("@@ ") {
             hunks += 1;
             in_header = false;
@@ -68,23 +73,36 @@ pub fn parse_diff_detailed<'py>(py: Python<'py>, diff_text: &str) -> PyResult<Bo
             cur_file = Some(make_file(py)?);
             in_header = true;
         } else if let Some(suffix) = line.strip_prefix("+++ ") {
+            // Strip optional timestamp appended after a tab (e.g. from difflib).
+            let path_part = suffix.split('\t').next().unwrap_or(suffix);
             if let Some(ref f) = cur_file {
-                if let Some(path) = suffix.strip_prefix("b/") {
+                if let Some(path) = path_part.strip_prefix("b/") {
                     f.set_item("path", path)?;
-                } else if suffix != "/dev/null" {
-                    f.set_item("path", suffix)?;
+                } else if path_part != "/dev/null" {
+                    f.set_item("path", path_part)?;
                 }
                 // /dev/null → deleted file; keep path set from "--- a/..."
             }
         } else if let Some(suffix) = line.strip_prefix("--- ") {
+            // Strip optional timestamp appended after a tab (e.g. from difflib).
+            let path_part = suffix.split('\t').next().unwrap_or(suffix);
+            // Create an implicit file record for plain unified diffs that have no
+            // leading "diff " line (e.g. the output of difflib.unified_diff).
+            // We do this whenever we are not already inside a header block.
+            if !in_header {
+                flush_hunk(py, &mut cur_file, &mut cur_hunk)?;
+                flush_file(py, &files, &mut cur_file)?;
+                cur_file = Some(make_file(py)?);
+                in_header = true;
+            }
             // Fill path from "---" only if not yet set (handles deleted files).
             if let Some(ref f) = cur_file {
                 let existing: String = f.get_item("path")?.unwrap().extract()?;
                 if existing.is_empty() {
-                    if let Some(path) = suffix.strip_prefix("a/") {
+                    if let Some(path) = path_part.strip_prefix("a/") {
                         f.set_item("path", path)?;
-                    } else if suffix != "/dev/null" {
-                        f.set_item("path", suffix)?;
+                    } else if path_part != "/dev/null" {
+                        f.set_item("path", path_part)?;
                     }
                 }
             }

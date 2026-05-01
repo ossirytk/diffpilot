@@ -29,13 +29,27 @@ mcp: FastMCP = FastMCP(
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+_DEFAULT_SUBPROCESS_TIMEOUT_SECONDS = 30
+
 
 def _resolve(path: str) -> str:
     return str(Path(path).expanduser().resolve())
 
 
-def _run(args: list[str], cwd: str) -> tuple[int, str, str]:
-    result = subprocess.run(args, cwd=cwd, capture_output=True, text=True, check=False)
+def _run(
+    args: list[str], cwd: str, timeout: float = _DEFAULT_SUBPROCESS_TIMEOUT_SECONDS
+) -> tuple[int, str, str]:
+    try:
+        result = subprocess.run(
+            args,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        return 124, "", f"Command timed out after {timeout} seconds: {' '.join(args)}"
     return result.returncode, result.stdout, result.stderr
 
 

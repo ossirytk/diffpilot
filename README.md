@@ -15,7 +15,7 @@ diffpilot provides structured, machine-readable diffs between files, git refs, a
 | `diff_staged` | Inspect currently staged changes; returns per-file structured hunks |
 | `summarize_diff` | Parse a raw unified diff string into summary counts (files, additions, deletions, hunks). Uses the Rust core when available |
 
-All tools return structured dicts — no raw text that needs post-processing.
+All tools return structured dicts; some responses may also include raw unified diff text when useful.
 
 ---
 
