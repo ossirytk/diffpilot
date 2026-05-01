@@ -19,10 +19,14 @@ mcp: FastMCP = FastMCP(
     name="diffpilot",
     instructions=(
         "diffpilot produces structured, machine-readable diffs optimized for AI assistants. "
-        "Use `diff_files` to compare two files and get hunks with line-level details. "
-        "Use `diff_refs` to diff between two git commits, branches, or tags. "
-        "Use `diff_staged` to inspect currently staged changes in a repository. "
-        "Use `summarize_diff` to get a high-level summary (counts only) of a raw diff string."
+        "All tools return per-file JSON with hunk-level line detail (additions, deletions, context). "
+        "Use `diff_files` to compare two arbitrary files and get structured hunks. "
+        "Use `diff_refs` to get a structured diff between two git commits, branches, or tags. "
+        "Use `diff_staged` to get structured hunks for currently staged changes in a repository. "
+        "Use `summarize_diff` to get a high-level summary (counts only) of a raw diff string. "
+        "Note: diffpilot does not cover unstaged working-tree diffs — use gitpilot's `git_diff` "
+        "(with staged=False) for that. For git workflow operations such as commit, push, or branch "
+        "management, use gitpilot."
     ),
 )
 
