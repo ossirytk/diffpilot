@@ -21,7 +21,112 @@ All tools return structured dicts; some responses may also include raw unified d
 
 ## Installation
 
-> Coming soon.
+**Requires:** Python 3.12+, [uv](https://docs.astral.sh/uv/)
+
+> **Optional Rust extension:** The `summarize_diff` tool uses a Rust core for faster large-diff parsing. The server works without it, but `summarize_diff` will be slower.
+
+### Option A — Install as a uv tool (recommended)
+
+```sh
+uv tool install git+https://github.com/ossirytk/diffpilot
+```
+
+The Rust extension is compiled automatically during install (requires a [Rust toolchain](https://rustup.rs/)).
+
+Verify:
+
+```sh
+diffpilot --help
+```
+
+To update later:
+
+```sh
+uv tool upgrade diffpilot
+```
+
+### Option B — Clone and run from source
+
+```sh
+git clone https://github.com/ossirytk/diffpilot
+cd diffpilot
+uv sync
+```
+
+To build the optional Rust extension:
+
+```sh
+uv run maturin develop
+```
+
+---
+
+## Configuration
+
+### GitHub Copilot CLI
+
+Add to `~/.copilot/mcp-config.json`:
+
+**Option A (installed tool):**
+
+```json
+{
+  "mcpServers": {
+    "diffpilot": {
+      "type": "stdio",
+      "command": "diffpilot"
+    }
+  }
+}
+```
+
+**Option B (local clone):**
+
+```json
+{
+  "mcpServers": {
+    "diffpilot": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/diffpilot", "diffpilot"]
+    }
+  }
+}
+```
+
+### VS Code Copilot
+
+Add to your user-level MCP config file:
+- **Linux:** `~/.config/Code/User/mcp.json`
+- **macOS:** `~/Library/Application Support/Code/User/mcp.json`
+- **Windows:** `%APPDATA%\Code\User\mcp.json`
+
+**Option A:**
+
+```json
+{
+  "servers": {
+    "diffpilot": {
+      "type": "stdio",
+      "command": "diffpilot"
+    }
+  }
+}
+```
+
+**Option B:**
+
+```json
+{
+  "servers": {
+    "diffpilot": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/diffpilot", "diffpilot"]
+    }
+  }
+}
+```
 
 ---
 

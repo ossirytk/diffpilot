@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "diffpilot": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/diffpilot", "diffpilot"],
+      "tools": ["*"]
+    }
+  }
+}
