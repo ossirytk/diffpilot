@@ -5,21 +5,21 @@ description: Structured diff tools returning per-file JSON hunks. Use this skill
 
 ## Overview
 
-diffpilot provides structured, machine-readable diffs optimized for AI assistants. All tools return per-file JSON with hunk-level line detail (additions, deletions, context lines). The Python MCP layer handles all tools; an optional Rust extension accelerates `summarize_diff` for large diffs.
+diffpilot provides structured, machine-readable diffs optimized for AI assistants. The `diff_*` tools return per-file JSON with hunk-level line detail (additions, deletions, context lines); `summarize_diff` returns aggregate counts only (files changed, total additions/deletions, hunk count). The Python MCP layer handles all tools; an optional Rust extension accelerates `summarize_diff` for large diffs.
 
 ## Available Tools
 
 | Tool | When to use |
 |------|-------------|
-| `diffpilot-diff_files` | Compare two arbitrary files; returns per-hunk line-level diff with additions, deletions, and raw unified diff. Required: `file_a`, `file_b`. |
-| `diffpilot-diff_refs` | Structured diff between two git commits, branches, or tags. Required: `path`, `ref_a`, `ref_b`. |
-| `diffpilot-diff_staged` | Structured hunks for currently staged changes in a repository. Required: `path`. |
-| `diffpilot-summarize_diff` | Parse a raw unified diff string into summary counts (files, additions, deletions, hunks). Required: `diff`. Uses Rust core when available. |
+| `diffpilot-diff_files` | Compare two arbitrary files; returns per-hunk line-level diff with additions, deletions, and raw unified diff. Required: `path_a`, `path_b`. |
+| `diffpilot-diff_refs` | Structured diff between two git commits, branches, or tags. Required: `ref_a`, `ref_b`. Optional: `path` (default: `"."`), `file_filter`. |
+| `diffpilot-diff_staged` | Structured hunks for currently staged changes in a repository. Optional: `path` (default: `"."`). |
+| `diffpilot-summarize_diff` | Parse a raw unified diff string into summary counts (files, additions, deletions, hunks). Required: `diff_text`. Uses Rust core when available. |
 
 ## Guidance
 
-- **Staged review**: use `diff_staged` before committing to confirm what will be included.
-- **Branch comparison**: use `diff_refs` with `ref_a="main"` and `ref_b="HEAD"` (or any refs).
+- **Staged review**: use `diffpilot-diff_staged` before committing to confirm what will be included.
+- **Branch comparison**: use `diffpilot-diff_refs` with `ref_a="main"` and `ref_b="HEAD"` (or any refs).
 - **Unstaged changes**: diffpilot does **not** cover unstaged working-tree diffs — use gitpilot's `git_diff` (with `staged=False`) for that.
 - **Git workflow ops** (commit, push, branch): use gitpilot, not diffpilot.
-- **Summarizing**: pipe raw diff text from any source into `summarize_diff` to get counts without parsing.
+- **Summarizing**: pipe raw diff text from any source into `diffpilot-summarize_diff` to get counts without parsing.
